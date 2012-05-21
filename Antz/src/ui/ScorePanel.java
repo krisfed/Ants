@@ -27,7 +27,6 @@ public class ScorePanel extends JPanel {
 	 */
 	public ScorePanel(World world) {
 		super();
-		System.out.println("ScorePanel Constructor");
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		///	Top panel is the player names and scores display
 		JPanel topPanel = new JPanel();

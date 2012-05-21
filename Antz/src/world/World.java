@@ -52,7 +52,7 @@ public class World {
 	 * Starts a new game
 	 */
 	public void beginGame(StateMachine redBrain, StateMachine blackBrain) {
-		System.out.println("world.beginGame()");
+		System.out.println("begin game");
 		ants = new ArrayList<>();
 		this.blackBrain = blackBrain;
 		this.redBrain = redBrain;
@@ -85,6 +85,7 @@ public class World {
 	 * Runs a loop of the game.
 	 */
 	private void update() {
+		System.out.println("World.update()");
 		for (turn = 0; turn < MAXTURNS; turn++) {
 			while(isPaused) {
 				try {
@@ -844,7 +845,20 @@ public class World {
 					}
 				}
 			}
+			
+			// check if borders are rocky
+			for (int i = 0; i < y; i++){
+				for (int j = 0; j < x; j++){
+					if ((i == 0) || (i == y-1) || (j == 0) || (j == x-1)){
+						if (cells[j][i].getTerrain() != E_Terrain.ROCKY){
+							throw new IllegalArgumentException();
+						}
+					} 
+				}
+			}//end of rocky borders check
+			
 			return new World(cells);
+			
 		} catch (Exception e) {
 			System.out.println("Error parsing world file.");
 			e.printStackTrace();

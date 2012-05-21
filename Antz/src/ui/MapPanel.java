@@ -46,11 +46,13 @@ public class MapPanel extends JLabel{
 	public MapPanel(GameplayScreen screen, World world)
 	{
 		super();
-		System.out.println("MapPanel Constructor");
 		this.screen = screen;
 		this.world = world;
-		zoomLevel = 1;
-		this.setPreferredSize(new Dimension(world.getWidth() * imageWidth , world.getHeight() * (imageHeight-20)));
+		zoomLevel = 4;
+		//this.setPreferredSize(new Dimension(72, 84));
+		this.setPreferredSize(new Dimension(world.getWidth() * 18 , world.getHeight() *21));
+		//this.setPreferredSize(new Dimension(world.getWidth() * imageWidth , world.getHeight() * (imageHeight-20)));
+
 		drawMarkers = false;
 		/**
 		 * Drag map functionality

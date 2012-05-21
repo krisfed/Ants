@@ -60,10 +60,11 @@ public class GameplayScreen extends JFrame {
 	    mainPanel.add("West", new JPanel());
 	    
 	    //  final initialization
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		//this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 	    this.setExtendedState(this.getExtendedState()|JFrame.MAXIMIZED_BOTH);
 	    this.setResizable(true);
 	    this.pack();
+	    this.setLocationRelativeTo(null);
 	    this.setVisible(true);  
 	}
 	
@@ -72,6 +73,7 @@ public class GameplayScreen extends JFrame {
 	 */
 	public void update()
 	{
+		//System.out.println("GameplayScreen.update()");
 		mapPanel.repaint();
 		scorePanel.redScore.setText("Score: " + world.getRedScore());
 		scorePanel.blackScore.setText("Score: " + world.getBlackScore());

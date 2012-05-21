@@ -45,7 +45,6 @@ import ai.StateMachine;
 		 */
 		public TournamentScreen(GameManager manager) {
 			super("Antz");
-			System.out.println("TournamentScreen Constructor");
 			fc = new JFileChooser();
 			this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 			this.manager = manager;
@@ -160,20 +159,7 @@ import ai.StateMachine;
 		 * Shows the file dialog where the user can attempt to load an ant world. 
 		 */
 		private void loadMap() {
-			int r = fc.showOpenDialog(this);
-			if (r == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile(); 
-				if (manager.setWorld(World.parseWorld(file.getAbsolutePath())))
-				{
-					loadedMapLabel.setText(file.getName());
-				} else {
-					JOptionPane.showMessageDialog(this, "File IO Error!");
-				}
-			}
-			//	Check if we can start a game
-			if (manager.getTotalPlayers() > 1 && manager.getWorld() != null) {
-				startGameButton.setEnabled(true);
-			}
+ 
 		}
 		
 		/**
