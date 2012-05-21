@@ -42,6 +42,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		JPanel turn = new JPanel();
 		turn.add(currentTurn);
 		temp.add(turn);
+
 		JPanel temp2 = new JPanel();
 		JSlider speedSlider = new JSlider(JSlider.HORIZONTAL, MINSPEED, MAXSPEED, MAXSPEED);
 		speedSlider.addChangeListener(this);
