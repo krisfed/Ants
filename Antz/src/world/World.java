@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
 import enums.E_Color;
 import enums.E_Condition;
 import enums.E_Direction;
@@ -30,6 +33,7 @@ public class World {
 	private Cell[][] cells;							//	The grid of cells which comprise this world
 	private ArrayList<Ant> ants;					//	The ants in the world
 	private StateMachine redBrain, blackBrain;		//	The two opposing player brains
+	private String redName, blackName;				//  Team names
 	private int redScore, blackScore;				//	Running total of scores
 	private GameplayScreen screen;
 	private static final int MAXTURNS = 300000;
@@ -54,16 +58,19 @@ public class World {
 	/**
 	 * Starts a new game
 	 */
-	public void beginGame(StateMachine redBrain, StateMachine blackBrain) {
+	public void beginGame(String redName, StateMachine redBrain, 
+			String blackName, StateMachine blackBrain) {
 		System.out.println("begin game");
 		ants = new ArrayList<>();
 		this.blackBrain = blackBrain;
 		this.redBrain = redBrain;
+		this.redName = redName;
+		this.blackName = blackName;
 		this.screen = new GameplayScreen(this);
 		setStartingAnts();
-		if (logger != null) {
-			logger.logTurn();
-		}
+//		if (logger != null) {
+//			logger.logTurn();
+//		}
 		update();
 	}
 	
@@ -71,9 +78,11 @@ public class World {
 	 * Sets up the initial ants in the world.
 	 */
 	private void setStartingAnts() {
-		System.out.println("World.setStartingAnts()");
-		for (int i = 0; i < cells.length; i ++) {
-			for (int j = 0 ; j < cells[0].length; j ++) {
+		//NOTE:
+		//cells[0].length = y
+		//cells.length = x
+		for (int i = 0; i < cells[0].length; i ++) {
+			for (int j = 0 ; j < cells.length; j ++) {
 				if (cells[j][i].getTerrain() == E_Terrain.BLACK_ANTHILL) {
 					Ant ant = new Ant(E_Color.BLACK, blackBrain);
 					setAntAt(new Position(j, i), ant);
@@ -91,44 +100,65 @@ public class World {
 	 * Runs a loop of the game.
 	 */
 	private void update() {
-		for (turn = 1; turn <= MAXTURNS; turn++) {
-			while(isPaused) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			for (Ant ant : ants) {
-				if (ant.isAlive()) {
-					if (ant.getResting() > 0) {
-						ant.setResting(ant.getResting() - 1);
-					} else {
-						Position p = this.findAnt(ant.getId());
-						Cell cell = cells[p.x][p.y];
-						ant.getStateMachine().step(ant, cell);
+		// make updates to the world in a worker thread, not to freeze the GUI
+		SwingWorker<Void, Void> worker =
+				new SwingWorker<Void, Void>() {
+			
+			   public Void doInBackground() {
+				   System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+
+					for (turn = 1; turn <= MAXTURNS; turn++) {
+												
+						while(isPaused) {
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						for (Ant ant : ants) {
+							if (ant.isAlive()) {
+								if (ant.getResting() > 0) {
+									ant.setResting(ant.getResting() - 1);
+								} else {
+									Position p = findAnt(ant.getId());
+									Cell cell = cells[p.x][p.y];
+									ant.getStateMachine().step(ant, cell);
+								}
+							}
+						}
+						calcScores();
+						
+						//update GUI in the Event Dispatch Thread
+						Runnable updateDisplay = new Runnable() {
+						    public void run() { screen.update(); }
+						};
+						SwingUtilities.invokeLater(updateDisplay);
+												
+						
+						//	dump turn info
+//						if (logger != null) {
+//							//	Choose which turns to log here
+//							if (turn < 10)
+//							logger.logTurn();
+//						}
+
+						//	Variable speed
+						try {
+							Thread.sleep(sleepAmount);
+						} catch (InterruptedException e) {
+							// Surely not a problem...
+							e.printStackTrace();
+						}
+						
 					}
-				}
-			}
-			calcScores();
-			//	Update the display
-			screen.update();
-			//	dump turn info
-			if (logger != null) {
-				//	Choose which turns to log here
-				if (turn < 10)
-				logger.logTurn();
-			}
-			//	Variable speed
-			try {
-				Thread.sleep(sleepAmount);
-			} catch (InterruptedException e) {
-				// Surely not a problem...
-				e.printStackTrace();
-			}
-		}
+					return null;
+			   }//end of DoInBackground
+			   
+		};
 		
+		worker.execute();
 	}
 	
 	/**
@@ -829,13 +859,14 @@ public class World {
 			int y = Integer.parseInt(line);
 			//	Setup grid of map cells - note x, y not row, column - is this OK?
 			Cell[][] cells = new Cell[x][y];
+	
 			//	Now read y lines of length x
 			for (int i = 0; i < y; i++) {
 				line = br.readLine();
 				line = line.replace(" ", "");
 				if (line.length() != x)
 					throw new IllegalArgumentException();
-					
+				
 				for (int j = 0; j < x; j ++) {
 					switch (line.charAt(j)){
 						case '.':			//	Clear cell
@@ -857,6 +888,7 @@ public class World {
 				}
 			}
 			
+			
 			// check if borders are rocky
 			for (int i = 0; i < y; i++){
 				for (int j = 0; j < x; j++){
@@ -875,6 +907,22 @@ public class World {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	/**
+	 * Returns red team's name
+	 * @return redName
+	 */
+	public String getRedName(){
+		return redName;
+	}
+	
+	/**
+	 * Returns black team's name
+	 * @return blackName
+	 */
+	public String getBlackName(){
+		return blackName;
 	}
 	
 	/**
@@ -901,6 +949,7 @@ public class World {
 	public void setRedBrain(StateMachine redBrain) {
 		this.redBrain = redBrain;
 	}
+	
 
 	/**
 	 * Returns the black player's brain.

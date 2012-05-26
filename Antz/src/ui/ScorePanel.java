@@ -38,7 +38,8 @@ public class ScorePanel extends JPanel {
 		topPanel.add(redPanel);
 		//	Red name label
 		ImageIcon red = new ImageIcon("images/redant_E_tiny.gif");
-		JLabel redBrain = new JLabel(world.getRedBrain().getName(), red, JLabel.TRAILING);
+		//JLabel redBrain = new JLabel(world.getRedBrain().getName(), red, JLabel.TRAILING);
+		JLabel redBrain = new JLabel(world.getRedName(), red, JLabel.TRAILING);
 		redBrain.setForeground(Color.RED);
 		redBrain.setHorizontalAlignment(SwingConstants.CENTER);
 		redBrain.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
@@ -59,7 +60,8 @@ public class ScorePanel extends JPanel {
 		topPanel.add(blackPanel);
 		//	Black name label
 		ImageIcon black = new ImageIcon("images/blackant_E_tiny.gif");
-		JLabel blackBrain = new JLabel(world.getBlackBrain().getName(), black, JLabel.TRAILING);
+		//JLabel blackBrain = new JLabel(world.getBlackBrain().getName(), black, JLabel.TRAILING);
+		JLabel blackBrain = new JLabel(world.getBlackName(), black, JLabel.TRAILING);
 		blackBrain.setForeground(Color.black);
 		blackBrain.setHorizontalAlignment(SwingConstants.CENTER);
 		blackBrain.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));

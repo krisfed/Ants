@@ -97,6 +97,8 @@ public class StartUpScreen extends JFrame {
 		System.out.println("startMatch");
 		MatchScreen matchScreen = new MatchScreen(gm);
 		
+		//gm.playDummyMatch();
+		
 	}
 
 	private void viewCredits() {

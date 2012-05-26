@@ -3,6 +3,7 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseWheelEvent;
@@ -73,12 +74,15 @@ public class GameplayScreen extends JFrame {
 	 */
 	public void update()
 	{
-		//System.out.println("GameplayScreen.update()");
-		mapPanel.repaint();
-		scorePanel.redScore.setText("Score: " + world.getRedScore());
-		scorePanel.blackScore.setText("Score: " + world.getBlackScore());
-		scorePanel.scoreRatio.repaint();
-		controlPanel.getCurrentTurn().setText("Turn: " + world.getTurn());
+		
+
+				//System.out.println("GameplayScreen.update()");
+				mapPanel.repaint();
+				scorePanel.redScore.setText("Score: " + world.getRedScore());
+				scorePanel.blackScore.setText("Score: " + world.getBlackScore());
+				scorePanel.scoreRatio.repaint();
+				controlPanel.getCurrentTurn().setText("Turn: " + world.getTurn());
+
 	}
 	
 	/**

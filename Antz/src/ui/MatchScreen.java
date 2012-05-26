@@ -112,7 +112,7 @@ public class MatchScreen extends JFrame {
 		addComponents();
 		
 	    //  final initialization
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		//this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setResizable(false);
 	    this.pack();
 	    this.setLocationRelativeTo(null);	
@@ -234,17 +234,22 @@ public class MatchScreen extends JFrame {
 		//determine team names
 		String redTeamName;
 		String blackTeamName;
-		if(redName.getText() == null){
-			redTeamName = redName.getText();
-		} else {
+		
+		System.out.println(redName.getText());
+		if(redName.getText().compareTo("") == 0){
 			redTeamName = new File(redFile.getText()).getName();
-			//redTeamName = redFile.getText().lastIndexOf('/')
-		}
-		if(blackName.getText() == null){
-			blackTeamName = redName.getText();
 		} else {
-			blackTeamName = new File(blackFile.getText()).getName();
+			redTeamName = redName.getText();
 		}
+		System.out.println("redTeamName: "+redTeamName);
+		
+		System.out.println(blackName.getText() );
+		if(blackName.getText().compareTo("") == 0){
+			blackTeamName = new File(blackFile.getText()).getName();
+		} else {
+			blackTeamName = blackName.getText();
+		}
+		System.out.println("blackTeamName: "+blackTeamName);
 		
 		boolean success = gm.addBrain(redTeamName, StateMachine.newInstance(redFile.getText())) &&
 				gm.addBrain(blackTeamName, StateMachine.newInstance(blackFile.getText()));
@@ -266,9 +271,13 @@ public class MatchScreen extends JFrame {
 
 		System.out.println("brains are set");
 		
-		this.setVisible(false);
 		
 		gm.playMatch(redTeamName, blackTeamName);
+		
+		this.setVisible(false);
+		this.dispose();
+		
+
 
 		
 	}

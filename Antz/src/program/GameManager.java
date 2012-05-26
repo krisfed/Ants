@@ -1,5 +1,6 @@
 package program;
 
+import java.awt.EventQueue;
 import java.util.HashMap;
 
 import ui.GameplayScreen;
@@ -32,22 +33,11 @@ public class GameManager {
 		setWorld(null);
 		if (debug)
 		{
+			
 			StartUpScreen startUp = new StartUpScreen(this);
 			//MatchScreen matchScreen = new MatchScreen(this);
-			//TournamentScreen ui = new TournamentScreen(this);
-//			setWorld(World.parseWorld("automap.txt"));
-//			StateMachine blackBrain = StateMachine.newInstance("crapBrain.txt");
-//			StateMachine redBrain = StateMachine.newInstance("exampleBrain.txt");
-//			playerBrains.put("crapBrain.txt", blackBrain);
-//			playerBrains.put("exampleBrain.txt", redBrain);
-//			playerScores.put("crapBrain.txt", 0);
-//			playerScores.put("exampleBrain.txt", 0);
-//			world.beginGame(redBrain, blackBrain);
-			
-//			setWorld(World.parseWorld("automap.txt"));
-//			addBrain("crapBrain.txt", StateMachine.newInstance("crapBrain.txt"));
-//			addBrain("exampleBrain.txt", StateMachine.newInstance("exampleBrain.txt"));
-//			world.beginGame(this.getBrain("crapBrain.txt"), this.getBrain("exampleBrain.txt"));
+			//playDummyMatch();
+
 			
 		} else {
 			TournamentScreen ui = new TournamentScreen(this);
@@ -62,18 +52,28 @@ public class GameManager {
 		
 	}
 	
+	public void playDummyMatch(){
+	
+		setWorld(World.parseWorld("sample0.world"));
+		addBrain("crapBrain.txt", StateMachine.newInstance("crapBrain.txt"));
+		addBrain("exampleBrain.txt", StateMachine.newInstance("exampleBrain.txt"));
+		world.beginGame("crapBrain.txt", this.getBrain("crapBrain.txt"), 
+				"exampleBrain.txt", this.getBrain("exampleBrain.txt"));
+	}
+	
 	
 	/**
 	 * Plays a single match
 	 * @param red string-key of the red team brain
 	 * @param black string-key of the black team brain
 	 */
-	public void playMatch(String red, String black){
+	public void playMatch(String redName, String blackName){
 		System.out.println("playMatch()");
 		System.out.println(playerBrains);
-		if((playerBrains.containsKey(red))&&(playerBrains.containsKey(black))){
+		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){
 			System.out.println("game set up");
-			world.beginGame(this.getBrain(red), this.getBrain(black));
+			world.beginGame(redName, this.getBrain(redName), 
+					blackName, this.getBrain(blackName));
 			
 		}
 		
@@ -83,7 +83,7 @@ public class GameManager {
 	 * Sets the world's map to an auto-generated map
 	 */
 	public void setGeneratedWorld(){
-		setWorld(world.generateMap());
+		setWorld(World.generateMap());
 	}
 	
 	/**
