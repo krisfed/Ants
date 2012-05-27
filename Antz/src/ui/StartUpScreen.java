@@ -78,7 +78,7 @@ public class StartUpScreen extends JFrame {
 		
 		pane.add(panel);
 		
-	    //  final initialization
+	    //final initialization
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setResizable(false);
 	    this.pack();

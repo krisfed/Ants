@@ -139,11 +139,7 @@ public class MatchScreen extends JFrame {
 		}
 		
 		//	Check if we can start the match
-		if ("".compareTo(blackFile.getText()) != 0 && 
-				"".compareTo(redFile.getText()) != 0 && 
-				gm.getWorld() != null) {
-			fightButton.setEnabled(true);
-		}
+		checkCanStartMatch();
 	
 	}
 	
@@ -156,7 +152,7 @@ public class MatchScreen extends JFrame {
 	 */
 	private void checkBrain(String absPath, E_Color color){
 		if (StateMachine.newInstance(absPath) == null){
-			JOptionPane.showMessageDialog(this, "Error!\nThis Ant Brain file contains syntax errors.\n"+
+			JOptionPane.showMessageDialog(this, "Error!\nThis Ant Brain file is invalid.\n"+
 					"Please check the contents of this file or try uploading a different one.", "Error", JOptionPane.ERROR_MESSAGE);
 			switch(color){
 			case RED:
@@ -188,11 +184,7 @@ public class MatchScreen extends JFrame {
 		}
 
 		//	Check if we can start the match
-		if ("".compareTo(blackFile.getText()) != 0 && 
-				"".compareTo(redFile.getText()) != 0 && 
-				gm.getWorld() != null) {
-			fightButton.setEnabled(true);
-		}
+		checkCanStartMatch();
 		
 	}
 
@@ -220,14 +212,21 @@ public class MatchScreen extends JFrame {
 		worldFile.setText("(auto-generated map)");
 		
 		//	Check if we can start the match
+		checkCanStartMatch();
+	}
+	
+	/**
+	 * Checks if the match can be started:
+	 * if there are brains and if the world is set.
+	 * Main purpose is to enable the fight button.
+	 */
+	private void checkCanStartMatch(){
 		if ("".compareTo(blackFile.getText()) != 0 && 
 				"".compareTo(redFile.getText()) != 0 && 
 				gm.getWorld() != null) {
 			fightButton.setEnabled(true);
 		}
 	}
-	
-	
 	
 	/**
 	 * Sets the red and black brains and starts the match
@@ -239,21 +238,16 @@ public class MatchScreen extends JFrame {
 		String redTeamName;
 		String blackTeamName;
 		
-		System.out.println(redName.getText());
 		if(redName.getText().compareTo("") == 0){
 			redTeamName = new File(redFile.getText()).getName();
 		} else {
 			redTeamName = redName.getText();
 		}
-		System.out.println("redTeamName: "+redTeamName);
-		
-		System.out.println(blackName.getText() );
 		if(blackName.getText().compareTo("") == 0){
 			blackTeamName = new File(blackFile.getText()).getName();
 		} else {
 			blackTeamName = blackName.getText();
 		}
-		System.out.println("blackTeamName: "+blackTeamName);
 		
 		boolean success = gm.addBrain(redTeamName, StateMachine.newInstance(redFile.getText())) &&
 				gm.addBrain(blackTeamName, StateMachine.newInstance(blackFile.getText()));
@@ -262,29 +256,18 @@ public class MatchScreen extends JFrame {
 		if (!success){
 			//only happens when there are brains with the same names (?)
 			JOptionPane.showMessageDialog(this, "Error!\nThese brains cannot be used together.\n"+
-					"Please make sure that uploaded brains have different names.", "Error", 
+					"Please make sure that all brains have different names.", "Error", 
 					JOptionPane.ERROR_MESSAGE);
 			gm.resetBrains(); //allow user to upload two fresh brains
 			return;
 		}
-//		
-//		String redTeamName = "red";
-//		String blackTeamName ="black";
-//		
-//		gm.addBrain(redTeamName, StateMachine.newInstance(redFile.getText()));
-//		gm.addBrain(blackTeamName, StateMachine.newInstance(blackFile.getText()));
-		
-
-		System.out.println("brains are set");
-		
+				
 		
 		gm.playMatch(redTeamName, blackTeamName);
 		
+		//close window
 		this.setVisible(false);
 		this.dispose();
-		
-
-
 		
 	}
 
