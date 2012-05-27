@@ -37,7 +37,7 @@ public class GameManager {
 			StartUpScreen startUp = new StartUpScreen(this);
 			//MatchScreen matchScreen = new MatchScreen(this);
 			//playDummyMatch();
-
+			//TournamentScreen tournScreen = new TournamentScreen(this);
 			
 		} else {
 			TournamentScreen ui = new TournamentScreen(this);
@@ -100,6 +100,15 @@ public class GameManager {
 		playerBrains.put(name, brain);
 		playerScores.put(name, 0);
 		return true;
+	}
+	
+	/**
+	 * Deletes all of the uploaded brains
+	 * and their scores.
+	 */
+	public void resetBrains(){
+		playerBrains = new HashMap<>();
+		playerScores = new HashMap<>();
 	}
 	
 	/**

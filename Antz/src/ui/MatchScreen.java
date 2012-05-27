@@ -2,6 +2,7 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -39,6 +40,8 @@ public class MatchScreen extends JFrame {
 	private final JFileChooser fc;
 	
 	
+	Font bigFont;
+	
 	//buttons:
 	JButton browseRedButton;
 	JButton browseBlackButton; 
@@ -61,6 +64,7 @@ public class MatchScreen extends JFrame {
 		super("Standard Match");
 		this.gm = gm;
 		fc = new JFileChooser();
+		bigFont = new Font("Arial", Font.BOLD, 20);
 		
 		
 		//make Buttons
@@ -256,10 +260,12 @@ public class MatchScreen extends JFrame {
 		
 				
 		if (!success){
-			//shouldn't happen
-			JOptionPane.showMessageDialog(this, "Error!\nThis Ant Brain file is invalid.\n"+
-					"Please check the contents of this file or try uploading a different one.", "Error", 
+			//only happens when there are brains with the same names (?)
+			JOptionPane.showMessageDialog(this, "Error!\nThese brains cannot be used together.\n"+
+					"Please make sure that uploaded brains have different names.", "Error", 
 					JOptionPane.ERROR_MESSAGE);
+			gm.resetBrains(); //allow user to upload two fresh brains
+			return;
 		}
 //		
 //		String redTeamName = "red";
@@ -294,82 +300,89 @@ public class MatchScreen extends JFrame {
 		JPanel mainPanel = new JPanel(gbl);
 		gbc.insets = new Insets(10,10,10,10);
 		
-		gbc.gridx=1;
-		gbc.gridy=0;
-		mainPanel.add(new JLabel("Red Team", JLabel.CENTER), gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 0;
 		
-		gbc.gridx=0;
-		gbc.gridy=1;
+		JLabel redLabel = new JLabel("Red Team", JLabel.CENTER);
+		redLabel.setFont(bigFont);
+		mainPanel.add(redLabel, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 1;
 		mainPanel.add(new JLabel("Name", JLabel.LEFT), gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=1;
+		gbc.gridx = 1;
+		gbc.gridy = 1;
 		mainPanel.add(redName, gbc);
 		
-		gbc.gridx=0;
-		gbc.gridy=2;
+		gbc.gridx = 0;
+		gbc.gridy = 2;
 		mainPanel.add(new JLabel("File", JLabel.LEFT), gbc);
 
-		gbc.gridx=1;
-		gbc.gridy=2;
+		gbc.gridx = 1;
+		gbc.gridy = 2;
 		mainPanel.add(redFile, gbc);
 		
 		
-		gbc.gridx=2;
-		gbc.gridy=2;
+		gbc.gridx = 2;
+		gbc.gridy = 2;
 		mainPanel.add(browseRedButton, gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=3;
-		mainPanel.add(new JLabel("Black Team", JLabel.CENTER), gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		JLabel blackLabel = new JLabel("Black Team", JLabel.CENTER);
+		blackLabel.setFont(bigFont);
+		mainPanel.add(blackLabel, gbc);
 		
-		gbc.gridx=0;
-		gbc.gridy=4;
+		gbc.gridx = 0;
+		gbc.gridy = 4;
 		mainPanel.add(new JLabel("Name", JLabel.LEFT), gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=4;
+		gbc.gridx = 1;
+		gbc.gridy = 4;
 		mainPanel.add(blackName, gbc);
 		
-		gbc.gridx=0;
-		gbc.gridy=5;
+		gbc.gridx = 0;
+		gbc.gridy = 5;
 		mainPanel.add(new JLabel("File", JLabel.LEFT), gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=5;
+		gbc.gridx = 1;
+		gbc.gridy = 5;
 		mainPanel.add(blackFile, gbc);
 		
-		gbc.gridx=2;
-		gbc.gridy=5;
+		gbc.gridx = 2;
+		gbc.gridy = 5;
 		mainPanel.add(browseBlackButton, gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=6;
-		mainPanel.add(new JLabel("World", JLabel.CENTER), gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 6;
+		JLabel worldLabel = new JLabel("World", JLabel.CENTER);
+		worldLabel.setFont(bigFont);
+		mainPanel.add(worldLabel, gbc);
 		
-		gbc.gridx=0;
-		gbc.gridy=7;
+		gbc.gridx = 0;
+		gbc.gridy = 7;
 		mainPanel.add(new JLabel("File", JLabel.LEFT), gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=7;
+		gbc.gridx = 1;
+		gbc.gridy = 7;
 		mainPanel.add(worldFile, gbc);
 		
-		gbc.gridx=2;
-		gbc.gridy=7;
+		gbc.gridx = 2;
+		gbc.gridy = 7;
 		mainPanel.add(browseWorldButton, gbc);
 		
-		gbc.gridx=3;
-		gbc.gridy=7;
+		gbc.gridx = 3;
+		gbc.gridy = 7;
 		mainPanel.add(generateWorldButton, gbc);
 		
-		gbc.gridx=1;
-		gbc.gridy=8;
+		gbc.gridx = 1;
+		gbc.gridy = 8;
 		gbc.fill = GridBagConstraints.BOTH;
 		mainPanel.add(backButton, gbc);
 		
-		gbc.gridx=2;
-		gbc.gridy=8;
+		gbc.gridx = 2;
+		gbc.gridy = 8;
 		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.BOTH;
 		mainPanel.add(fightButton, gbc);

@@ -89,7 +89,7 @@ public class StartUpScreen extends JFrame {
 
 	private void startTournament() {
 		System.out.println("startTournament");
-		// TODO Auto-generated method stub
+		TournamentScreen tournamentScreen = new TournamentScreen(gm);
 		
 	}
 

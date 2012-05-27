@@ -3,7 +3,11 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -18,174 +22,225 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
 
 import program.GameManager;
 import world.World;
 import ai.StateMachine;
 
+/**
+ * Screen to set up a tournament
+ * @author kris
+ *
+ */
+public class TournamentScreen extends JFrame{
+	private GameManager gm;
+	private final JFileChooser fc;
+	
+	Font bigFont;
+	
+	//buttons
+	JButton browseWorldButton;
+	JButton generateWorldButton;
+	JButton browseBrainButton;
+	JButton addBrainButton;
+	JButton beginButton;
+	JButton backButton;
+	
+	//text fields
+	JTextField brainName;
+	JTextField brainFile;
+	JTextField worldFile;
+	
+	//table
+	JTable table;
+	JScrollPane tableScroll;
+	
 	/**
-	 * The graphical user interface used for the main menu. 
-	 * @author JOH
-	 * @version 0.1
+	 * Constructor
 	 */
-	public class TournamentScreen extends JFrame{
-	
-		//	Reference to the Game manager which stores all the brains, etc.
-		private GameManager manager;
+	public TournamentScreen(GameManager gm){
+		super("Tournament Mode");
+		this.gm = gm;
+		fc = new JFileChooser();
+		bigFont = new Font("Arial", Font.BOLD, 20);
 		
-		private JButton startGameButton;
-		private JLabel loadedMapLabel;
-		private JList<String> loadedBrainsList;
-		private DefaultListModel<String> listModel;
-		private final JFileChooser fc;
-		
-		/**
-		 * Constructor.
-		 */
-		public TournamentScreen(GameManager manager) {
-			super("Antz");
-			fc = new JFileChooser();
-			this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-			this.manager = manager;
-			//  initialize GUI using a BorderLayout
-		    Container pane = this.getContentPane();
-		    JPanel mainPanel = new JPanel(new BorderLayout());
-		    pane.add(mainPanel);	
-		    mainPanel.add("Center", new JPanel());
-		    mainPanel.add("North", new JPanel());
-		    mainPanel.add("South", new JPanel());
-		    mainPanel.add("East", infoPanel());
-		    mainPanel.add("West", menuPanel());
-		    //  final initialization
-		    this.setLocationRelativeTo(null);	//	This centralizes the window
-		    this.setResizable(false);	//	The layout manager makes things look rubbish if resized
-		    this.pack();
-		    this.setVisible(true);  
-		}
-	
-		/**
-		 * The panel which shows the currently loaded map and brains.
-		 * @return the panel
-		 */
-		private JPanel infoPanel() {
-			JPanel outerPanel = new JPanel();
-			
-			JPanel innerPanel = new JPanel();
-			innerPanel.setLayout(new GridLayout(0, 1));
-
-			loadedMapLabel = new JLabel("No map loaded");
-			loadedMapLabel.setAlignmentX(JPanel.RIGHT_ALIGNMENT);
-			innerPanel.add(loadedMapLabel);
-			outerPanel.add(innerPanel);
-			
-			listModel = new DefaultListModel<String>();
-			loadedBrainsList = new JList<String>(listModel);
-			loadedBrainsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			loadedBrainsList.setLayoutOrientation(JList.VERTICAL);
-			listModel.addElement("No brains loaded");
-			JScrollPane listScroll = new JScrollPane(loadedBrainsList);
-			listScroll.setPreferredSize(new Dimension(200, 200));
-			outerPanel.add(listScroll);
-			return outerPanel;
-		}
-	
-		/**
-		 * The main menu buttons displayed when program first loaded.
-		 * @return the JPanel enclosing the menu buttons.
-		 */
-		@SuppressWarnings("serial")
-		private JPanel menuPanel() {
-			JPanel panel = new JPanel();
-			panel.setLayout(new GridLayout(0, 1));
-			
-			startGameButton = new JButton(new AbstractAction("Start Game") {
-				public void actionPerformed(ActionEvent arg0) {
-					startGame();
-				}
-			});
-			//	You can't start a game until a map is loaded and number of players > 1
-			startGameButton.setEnabled(false);
-			panel.add(startGameButton);
-			
-			panel.add(new JButton(new AbstractAction("Upload Map") {
-				public void actionPerformed(ActionEvent arg0) {
-					loadMap();
-				}
-			}));
-			
-			panel.add(new JButton(new AbstractAction("Upload Ant Brain") {
-				public void actionPerformed(ActionEvent arg0) {
-					loadBrain();
-				}
-			}));
-			
-			panel.add(new JButton(new AbstractAction("View Credits") {
-				public void actionPerformed(ActionEvent arg0) {
-					viewCredits();
-				}
-			}));
-			return panel;
-		}
-		
-		private void viewCredits() {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		/**
-		 * Shows the file dialog where the user can attempt to load an ant brain.
-		 */
-		private void loadBrain() {
-			int r = fc.showOpenDialog(this);
-			if (r == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
-				//	Try to add brain
-				if (manager.addBrain(file.getName(), StateMachine.newInstance(file.getAbsolutePath())))
-				{
-					listModel.removeElement("No brains loaded");
-					listModel.addElement(file.getName());
-				} else {
-					JOptionPane.showMessageDialog(this, "File IO Error!");
-				}
+		//make buttons
+		backButton = new JButton(new AbstractAction("Back"){
+			public void actionPerformed(ActionEvent e) {
+				dispose();
 			}
-			//	Check if we can start a game
-			if (manager.getTotalPlayers() > 1 && manager.getWorld() != null) {
-				startGameButton.setEnabled(true);
+		});
+		beginButton = new JButton(new AbstractAction("Begin"){
+			public void actionPerformed(ActionEvent e) {
+				startTournament();
 			}
-		}
+		});
+		beginButton.setEnabled(false);
+		browseWorldButton = new JButton(new AbstractAction("Browse"){
+			public void actionPerformed(ActionEvent e) {
+				loadMap();
+			}
+		});
+		generateWorldButton = new JButton(new AbstractAction("Generate"){
+			public void actionPerformed(ActionEvent e) {
+				generateMap();
+			}
+		});
+		browseBrainButton = new JButton(new AbstractAction("Browse"){
+			public void actionPerformed(ActionEvent e) {
+				browseBrain();
+			}
+		});
+		addBrainButton = new JButton(new AbstractAction("Add"){
+			public void actionPerformed(ActionEvent e) {
+				addBrain();
+			}
+		});
 		
-		/**
-		 * Shows the file dialog where the user can attempt to load an ant world. 
-		 */
-		private void loadMap() {
- 
-		}
+		//make text fields
+		brainName = new JTextField(20);
+		brainFile = new JTextField(20);
+		worldFile = new JTextField(20);
 		
-		/**
-		 * Starts a game
-		 */
-		private void startGame() {
-			manager.assignMatches();
-		}
+		//make table
+		String[] colHeadings = {"Name","Brain"};
+		int numRows = 14;
+		DefaultTableModel model = new DefaultTableModel(numRows, colHeadings.length) ;
+		model.setColumnIdentifiers(colHeadings);
+		table = new JTable(model);
+		tableScroll = new JScrollPane(table);
+		tableScroll.setPreferredSize(new Dimension(300, 18*numRows));
 		
-		///
-		///	Getters & Setters
-		///
-	
-		public JLabel getLoadedMapLabel() {
-			return loadedMapLabel;
-		}
-	
-		public void setLoadedMapLabel(JLabel loadedMapLabel) {
-			this.loadedMapLabel = loadedMapLabel;
-		}
-	
-		public JList<String> getLoadedBrainsList() {
-			return loadedBrainsList;
-		}
-	
-		public void setLoadedBrainsList(JList<String> loadedBrainsList) {
-			this.loadedBrainsList = loadedBrainsList;
-		}
+		
+		//place components of GUI
+		addComponents();
+		
+	    //  final initialization
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setResizable(false);
+	    this.pack();
+	    this.setLocationRelativeTo(null);	
+	    this.setVisible(true);  
+		
 	}
+
+	protected void addBrain() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void browseBrain() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void generateMap() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void loadMap() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void startTournament() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void addComponents() {
+		Container pane = this.getContentPane();
+		
+		GridBagLayout gbl = new GridBagLayout();
+		GridBagConstraints gbc = new GridBagConstraints();
+		JPanel mainPanel = new JPanel(gbl);
+		gbc.insets = new Insets(10,10,10,10);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		JLabel worldLabel = new JLabel("World", JLabel.CENTER);
+		worldLabel.setFont(bigFont);
+		mainPanel.add(worldLabel, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		mainPanel.add(new JLabel("File", JLabel.LEFT), gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		mainPanel.add(worldFile, gbc);
+		
+		gbc.gridx = 2;
+		gbc.gridy = 1;
+		mainPanel.add(browseWorldButton, gbc);
+		
+		gbc.gridx = 3;
+		gbc.gridy = 1;
+		mainPanel.add(generateWorldButton, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		JLabel brainLabel = new JLabel("Ant Brain", JLabel.CENTER);
+		brainLabel.setFont(bigFont);
+		mainPanel.add(brainLabel, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		mainPanel.add(new JLabel("Name", JLabel.LEFT), gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		mainPanel.add(brainName, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		mainPanel.add(new JLabel("File", JLabel.LEFT), gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 4;
+		mainPanel.add(brainFile, gbc);
+		
+		gbc.gridx = 2;
+		gbc.gridy = 4;
+		mainPanel.add(browseBrainButton, gbc);
+		
+		gbc.gridx = 3;
+		gbc.gridy = 4;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		mainPanel.add(addBrainButton, gbc);
+		
+		
+		gbc.gridx = 0;
+		gbc.gridy = 5;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 6;
+		gbc.fill = GridBagConstraints.BOTH;
+		mainPanel.add(tableScroll, gbc);
+		
+		gbc.gridx = 2;
+		gbc.gridy = 8;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		mainPanel.add(beginButton, gbc);
+		
+		gbc.gridx = 2;
+		gbc.gridy = 9;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		mainPanel.add(backButton, gbc);
+		
+
+		
+		
+		pane.add(mainPanel);
+	}
+	
+}
+
