@@ -68,6 +68,7 @@ public class StateMachine {
 				currentState ++;
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			//	Problem reading file - handle elsewhere
 			return null;
 		}

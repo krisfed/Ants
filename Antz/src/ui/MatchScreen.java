@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 import enums.E_Color;
 
@@ -41,6 +42,9 @@ public class MatchScreen extends JFrame {
 	
 	
 	Font bigFont;
+	
+	String redTeamName;
+	String blackTeamName;
 	
 	//buttons:
 	JButton browseRedButton;
@@ -64,7 +68,7 @@ public class MatchScreen extends JFrame {
 		super("Standard Match");
 		this.gm = gm;
 		fc = new JFileChooser();
-		bigFont = new Font("Arial", Font.BOLD, 20);
+		bigFont = new Font("Tahoma", Font.BOLD, 20);
 		
 		
 		//make Buttons
@@ -235,8 +239,6 @@ public class MatchScreen extends JFrame {
 		
 		
 		//determine team names
-		String redTeamName;
-		String blackTeamName;
 		
 		if(redName.getText().compareTo("") == 0){
 			redTeamName = new File(redFile.getText()).getName();
@@ -263,7 +265,19 @@ public class MatchScreen extends JFrame {
 		}
 				
 		
+		SwingWorker<Void, Void> worker =
+		new SwingWorker<Void, Void>() {
+	
+	   public Void doInBackground() {
 		gm.playMatch(redTeamName, blackTeamName);
+		return null;
+	   }
+		};
+		worker.execute();
+		
+//		JOptionPane.showMessageDialog(null, "Error!\nThis Map text file is invalid.\n"+
+//				"Please check the contents of this file or try uploading a different one.", 
+//				"What's that?", JOptionPane.PLAIN_MESSAGE);
 		
 		//close window
 		this.setVisible(false);

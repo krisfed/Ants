@@ -72,7 +72,7 @@ public class TournamentScreen extends JFrame{
 		super("Tournament Mode");
 		this.gm = gm;
 		fc = new JFileChooser();
-		bigFont = new Font("Arial", Font.BOLD, 20);
+		bigFont = new Font("Tahoma", Font.BOLD, 20);
 		
 		//make buttons
 		backButton = new JButton(new AbstractAction("Back"){
@@ -275,7 +275,8 @@ public class TournamentScreen extends JFrame{
 		} else {
 			worldFile.setText("");
 			JOptionPane.showMessageDialog(this, "Error!\nThis Map text file is invalid.\n"+
-		"Please check the contents of this file or try uploading a different one.", "Error", JOptionPane.ERROR_MESSAGE);
+		"Please check the contents of this file or try uploading a different one.", 
+		"Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 

@@ -1,7 +1,11 @@
 package program;
 
 import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import ui.GameplayScreen;
 import ui.MatchScreen;
@@ -68,12 +72,30 @@ public class GameManager {
 	 * @param black string-key of the black team brain
 	 */
 	public void playMatch(String redName, String blackName){
-		System.out.println("playMatch()");
 		System.out.println(playerBrains);
 		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){
 			System.out.println("game set up");
 			world.beginGame(redName, this.getBrain(redName), 
 					blackName, this.getBrain(blackName));
+			
+		String winnerMessage;
+		if (world.getBlackScore() > world.getRedScore()){
+			winnerMessage = blackName + " won!\n";
+		} else if (world.getBlackScore() < world.getRedScore()){
+			winnerMessage = redName+ " won!\n";
+		} else {
+			winnerMessage = "It's a draw!\n";
+		}
+		JOptionPane.showMessageDialog(null, 
+				winnerMessage,
+				"Pleased to announce the winner!", 
+				JOptionPane.PLAIN_MESSAGE);
+		world.closeScreen();
+		
+		//world.swapBrains();
+		
+		// if this is a singular match:
+		this.resetBrains();
 			
 		}
 		

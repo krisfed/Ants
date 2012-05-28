@@ -6,10 +6,12 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
@@ -36,11 +38,13 @@ public class World {
 	private String redName, blackName;				//  Team names
 	private int redScore, blackScore;				//	Running total of scores
 	private GameplayScreen screen;
-	private static final int MAXTURNS = 300000;
+	private static final int MAXTURNS = 10000; //10000;//300000;
 	private int sleepAmount = 0;
 	private boolean isPaused;
 	private int turn;
 	private AntLogger logger;
+	
+
 	
 	/**
 	 * Private constructor.
@@ -53,31 +57,55 @@ public class World {
 			}
 		}
 		logger = new AntLogger(this);
+		
 	}
+	
+	
+
 	
 	/**
 	 * Starts a new game
 	 */
 	public void beginGame(String redName, StateMachine redBrain, 
 			String blackName, StateMachine blackBrain) {
-		System.out.println("begin game");
+		System.out.println("beginGame()");
+		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		ants = new ArrayList<>();
 		this.blackBrain = blackBrain;
 		this.redBrain = redBrain;
 		this.redName = redName;
 		this.blackName = blackName;
-		this.screen = new GameplayScreen(this);
+		
+//		//create GUI from EDT:
+		Runnable createGameplayScreen= new Runnable() {
+	    public void run() {
+	    	screen = new GameplayScreen(World.this);
+	    	}
+	    };
+	    try {
+			SwingUtilities.invokeAndWait(createGameplayScreen);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	
+	    //set up
 		setStartingAnts();
+
 //		if (logger != null) {
 //			logger.logTurn();
 //		}
-		update();
+				
+		//run game loop
+		update(); 
+		
 	}
 	
 	/**
 	 * Sets up the initial ants in the world.
 	 */
 	private void setStartingAnts() {
+		System.out.println("setStartingAnts()");
+		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		//NOTE:
 		//cells[0].length = y
 		//cells.length = x
@@ -100,65 +128,65 @@ public class World {
 	 * Runs a loop of the game.
 	 */
 	private void update() {
-		// make updates to the world in a worker thread, not to freeze the GUI
-		SwingWorker<Void, Void> worker =
-				new SwingWorker<Void, Void>() {
-			
-			   public Void doInBackground() {
-				   System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+		System.out.println("update()");
+		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 
-					for (turn = 1; turn <= MAXTURNS; turn++) {
+		for (turn = 1; turn <= MAXTURNS; turn++) {
 												
-						while(isPaused) {
-							try {
-								Thread.sleep(100);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						for (Ant ant : ants) {
-							if (ant.isAlive()) {
-								if (ant.getResting() > 0) {
-									ant.setResting(ant.getResting() - 1);
-								} else {
-									Position p = findAnt(ant.getId());
-									Cell cell = cells[p.x][p.y];
-									ant.getStateMachine().step(ant, cell);
-								}
-							}
-						}
-						calcScores();
-						
-						//update GUI in the Event Dispatch Thread
-						Runnable updateDisplay = new Runnable() {
-						    public void run() { screen.update(); }
-						};
-						SwingUtilities.invokeLater(updateDisplay);
-												
-						
-						//	dump turn info
-//						if (logger != null) {
-//							//	Choose which turns to log here
-//							if (turn < 10)
-//							logger.logTurn();
-//						}
-
-						//	Variable speed
-						try {
-							Thread.sleep(sleepAmount);
-						} catch (InterruptedException e) {
-							// Surely not a problem...
-							e.printStackTrace();
-						}
-						
+			while(isPaused) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			for (Ant ant : ants) {
+				if (ant.isAlive()) {
+					if (ant.getResting() > 0) {
+						ant.setResting(ant.getResting() - 1);
+					} else {
+						Position p = findAnt(ant.getId());
+						Cell cell = cells[p.x][p.y];
+						ant.getStateMachine().step(ant, cell);
 					}
-					return null;
-			   }//end of DoInBackground
-			   
-		};
-		
-		worker.execute();
+				}
+			}
+			calcScores();
+			
+			//update GUI in EDT
+			Runnable updateDisplay = new Runnable() {
+				public void run() { screen.update(); }
+			};
+			SwingUtilities.invokeLater(updateDisplay);
+												
+						
+			//	dump turn info
+//			if (logger != null) {
+//				//	Choose which turns to log here
+//				if (turn < 10)
+//					logger.logTurn();
+//			}
+
+			//	Variable speed
+			try {
+				Thread.sleep(sleepAmount);
+			} catch (InterruptedException e) {
+				// Surely not a problem...
+				e.printStackTrace();
+			}
+				
+		}
+
+	}
+	
+	
+	
+	/**
+	 * Close the gameplay scren
+	 */
+	public void closeScreen(){
+		screen.dispose();
 	}
 	
 	/**
