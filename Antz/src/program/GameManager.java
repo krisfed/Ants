@@ -2,14 +2,17 @@ package program;
 
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import ui.GameplayScreen;
 import ui.MatchScreen;
 import ui.StartUpScreen;
+import ui.TournamentBracket;
 import ui.TournamentScreen;
 import world.World;
 import ai.StateMachine;
@@ -25,6 +28,8 @@ public class GameManager {
 	// The set of uploaded brains - identified by their filename
 	private HashMap<String, StateMachine> playerBrains;
 	private HashMap<String, Integer> playerScores;
+	
+	private ArrayList<Object> matches;
 
 	private World world;
 	
@@ -38,13 +43,76 @@ public class GameManager {
 		if (debug)
 		{
 			
-			StartUpScreen startUp = new StartUpScreen(this);
+			//StartUpScreen startUp = new StartUpScreen(this);
 			//MatchScreen matchScreen = new MatchScreen(this);
 			//playDummyMatch();
 			//TournamentScreen tournScreen = new TournamentScreen(this);
+			playDummyTourn();
 			
 		} else {
 			TournamentScreen ui = new TournamentScreen(this);
+		}
+	}
+	
+	/**
+	 * (recursively) creates a hierarchy of pairs 
+	 * out of a given array list
+	 * @param pairs list to combine into pairs
+	 * @return multi-nested array list of pairs
+	 */
+	private ArrayList<Object> combineIntoPairs(ArrayList<Object> pairs){
+		//if already only one pair, return as is
+		if (pairs.size() == 2){
+			//in case it's first recursion, and input is
+			//in the form of ["String1", "String2"]
+			if(pairs.get(0).getClass() == "".getClass()){
+				ArrayList<Object> arrayedPair = new ArrayList<>();
+				for (int i=0; i<2; i++){
+					ArrayList<Object >singularPair = new ArrayList<>();
+					singularPair.add(pairs.get(i));
+					arrayedPair.add(singularPair);
+				}
+				return arrayedPair;
+			}
+			return pairs;
+		} else {
+			ArrayList<Object> newPairs = new ArrayList<>(); //less pairs
+			//while at least 2 elements
+			while(pairs.size()>1){
+				ArrayList<Object >pair = new ArrayList<>();
+				//pick two elements at random to form a new pair, 
+				//remove them from the list of available elements
+				for (int i = 0; i<2; i++){
+					Object pick = pairs.remove((int)(Math.random()*pairs.size()));
+					//if a string, enclose in ArrayList:
+					if(pick.getClass() == "".getClass()){
+						ArrayList<Object >singularPair = new ArrayList<>();
+						singularPair.add(pick);
+						pair.add(singularPair);
+					//else add as is:	
+					} else {
+						pair.add(pick);
+					}
+				}	
+				//add the new pair
+				newPairs.add(pair);
+			}
+			//if still one element left (odd number of elements),
+			//add it as a pair of its own
+			if(pairs.size()==1){
+				Object lastOne = pairs.get(0);
+				//if a string, enclose in ArrayList
+				if(lastOne.getClass() == "".getClass()){
+					ArrayList<Object >singularPair = new ArrayList<>();
+					singularPair.add(lastOne);
+					newPairs.add(singularPair);
+				//else add as is:
+				} else {
+					newPairs.add(lastOne);
+				}
+			}
+			//recursive call on a new collection of pairs:
+			return combineIntoPairs(newPairs);
 		}
 	}
 	
@@ -53,16 +121,43 @@ public class GameManager {
 	 */
 	public void assignMatches()
 	{
+		ArrayList<Object> players = new ArrayList<>();//players to assign
+		players.addAll(playerBrains.keySet()); //add all team names
+		
+		matches = combineIntoPairs(players);
+		System.out.println(matches);
+//		for (Object pair : matches){
+//			System.out.println(pair);
+//		}
+
+		displayBracket();
+		
 		
 	}
 	
-	public void playDummyMatch(){
+	public void displayBracket(){
+		JFrame bracket = new JFrame("Tournament Bracket");
+		bracket.add(new TournamentBracket(matches, playerBrains.size()));
+		bracket.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//for now only
+		bracket.pack();
+		bracket.setLocationRelativeTo(null);
+		bracket.setVisible(true);
+	}
 	
+	public void playDummyMatch(){	
 		setWorld(World.parseWorld("sample0.world"));
 		addBrain("crapBrain.txt", StateMachine.newInstance("crapBrain.txt"));
 		addBrain("exampleBrain.txt", StateMachine.newInstance("exampleBrain.txt"));
-		world.beginGame("crapBrain.txt", this.getBrain("crapBrain.txt"), 
-				"exampleBrain.txt", this.getBrain("exampleBrain.txt"));
+		playMatch("crapBrain.txt", "exampleBrain.txt");
+	}
+	
+	public void playDummyTourn(){	
+		setWorld(World.parseWorld("sample0.world"));
+		int numberPlayers = 7;
+		for (int i = 1; i <= numberPlayers; i++){
+			addBrain("ex"+i, StateMachine.newInstance("exampleBrain.txt"));
+		}
+		assignMatches();
 	}
 	
 	
@@ -74,30 +169,40 @@ public class GameManager {
 	public void playMatch(String redName, String blackName){
 		System.out.println(playerBrains);
 		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){
-			System.out.println("game set up");
-			world.beginGame(redName, this.getBrain(redName), 
-					blackName, this.getBrain(blackName));
+			world.setRedBrain(redName, this.getBrain(redName));
+			world.setBlackBrain(blackName, this.getBrain(blackName));
 			
-		String winnerMessage;
-		if (world.getBlackScore() > world.getRedScore()){
-			winnerMessage = blackName + " won!\n";
-		} else if (world.getBlackScore() < world.getRedScore()){
-			winnerMessage = redName+ " won!\n";
-		} else {
-			winnerMessage = "It's a draw!\n";
-		}
-		JOptionPane.showMessageDialog(null, 
-				winnerMessage,
-				"Pleased to announce the winner!", 
-				JOptionPane.PLAIN_MESSAGE);
-		world.closeScreen();
+			System.out.println("game set up");
+			
+			world.beginGame();
+			showResults();
+			world.closeScreen();
 		
-		//world.swapBrains();
+			world.swapBrains();
+			world.beginGame();
+			showResults();
+			world.closeScreen();
 		
 		// if this is a singular match:
 		this.resetBrains();
 			
 		}
+		
+	}
+	
+	private void showResults(){
+		String winnerMessage;
+		if (world.getBlackScore() > world.getRedScore()){
+			winnerMessage = world.getBlackName() + " won!\n";
+		} else if (world.getBlackScore() < world.getRedScore()){
+			winnerMessage = world.getRedName() + " won!\n";
+		} else {
+			winnerMessage = "It's a draw!\n";
+		}
+		JOptionPane.showMessageDialog(null, 
+			winnerMessage,
+			"Pleased to announce the winner!", 
+			JOptionPane.PLAIN_MESSAGE);
 		
 	}
 	

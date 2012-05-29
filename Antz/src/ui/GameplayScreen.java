@@ -95,13 +95,11 @@ public class GameplayScreen extends JFrame {
 	 */
 	public void update()
 	{
-		
 				mapPanel.repaint();
 				scorePanel.redScore.setText("Score: " + world.getRedScore());
 				scorePanel.blackScore.setText("Score: " + world.getBlackScore());
 				scorePanel.scoreRatio.repaint();
 				controlPanel.getCurrentTurn().setText("Turn: " + world.getTurn());
-
 	}
 	
 

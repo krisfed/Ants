@@ -60,43 +60,38 @@ public class World {
 		
 	}
 	
-	
-
-	
+		
 	/**
 	 * Starts a new game
 	 */
-	public void beginGame(String redName, StateMachine redBrain, 
-			String blackName, StateMachine blackBrain) {
+	public void beginGame() {
 		System.out.println("beginGame()");
 		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		ants = new ArrayList<>();
-		this.blackBrain = blackBrain;
-		this.redBrain = redBrain;
-		this.redName = redName;
-		this.blackName = blackName;
 		
-//		//create GUI from EDT:
-		Runnable createGameplayScreen= new Runnable() {
-	    public void run() {
-	    	screen = new GameplayScreen(World.this);
-	    	}
-	    };
-	    try {
-			SwingUtilities.invokeAndWait(createGameplayScreen);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		if(redBrain != null && redName != null && blackBrain != null && blackName != null){
+			//create GUI from EDT:
+			Runnable createGameplayScreen= new Runnable() {
+				public void run() {
+					screen = new GameplayScreen(World.this);
+				}
+			};
+			try {
+				SwingUtilities.invokeAndWait(createGameplayScreen);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}	
 	
-	    //set up
-		setStartingAnts();
+			//set up
+			setStartingAnts();
 
-//		if (logger != null) {
-//			logger.logTurn();
-//		}
+//			if (logger != null) {
+//				logger.logTurn();
+//			}
 				
-		//run game loop
-		update(); 
+			//run game loop
+			update(); 
+		}
 		
 	}
 	
@@ -958,8 +953,11 @@ public class World {
 	 */
 	public void swapBrains() {
 		StateMachine swap = redBrain;
+		String swapString = redName;
 		redBrain = blackBrain;
 		blackBrain = swap;
+		redName = blackName;
+		blackName = swapString;
 	}
 
 	/**
@@ -972,16 +970,17 @@ public class World {
 
 	/**
 	 * Sets the red player's brain.
+	 * @param redName name of the red team
 	 * @param redBrain
 	 */
-	public void setRedBrain(StateMachine redBrain) {
+	public void setRedBrain(String redName, StateMachine redBrain) {
+		this.redName = redName;
 		this.redBrain = redBrain;
 	}
 	
 
 	/**
 	 * Returns the black player's brain.
-	 * @return
 	 */
 	public StateMachine getBlackBrain() {
 		return blackBrain;
@@ -990,9 +989,11 @@ public class World {
 	/**
 	 * Sets the black player's brain.
 	 * @param blackBrain
+	 * @param blackName name of the black team
 	 */
-	public void setBlackBrain(StateMachine blackBrain) {
+	public void setBlackBrain(String blackName, StateMachine blackBrain) {
 		this.blackBrain = blackBrain;
+		this.blackName = blackName;
 	}
 
 
