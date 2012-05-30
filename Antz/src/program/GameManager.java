@@ -33,6 +33,10 @@ public class GameManager {
 
 	private World world;
 	
+	private JFrame bracket;
+	private TournamentBracket tournamentBracket;
+	
+	
 	/**
 	 * Constructor.
 	 */
@@ -64,7 +68,8 @@ public class GameManager {
 		//if already only one pair, return as is
 		if (pairs.size() == 2){
 			//in case it's first recursion, and input is
-			//in the form of ["String1", "String2"]
+			//in the form of ["String1", "String2"],
+			//get them wrapped in arrays
 			if(pairs.get(0).getClass() == "".getClass()){
 				ArrayList<Object> arrayedPair = new ArrayList<>();
 				for (int i=0; i<2; i++){
@@ -131,13 +136,99 @@ public class GameManager {
 //		}
 
 		displayBracket();
+		System.out.println("==Result: " +playMatches(matches));
+	}
+	
+	/**
+	 * Simulation of the match: select the winner at random
+	 * @param str1
+	 * @param str2
+	 * @return
+	 */
+	private Object pretendMatch(String str1, String str2){
+		if(Math.random()>0.5){
+			System.out.println("==="+str1+" vs. "+str2+ "; winner:" + str1);
+			return str1;
+		} else {
+			System.out.println("==="+str1+" vs. "+str2+ "; winner:" + str2);
+			return str2;
+		}
+	}
+	
+	/**
+	 * Recursively plays out all the matches
+	 * @param matchesToPlay
+	 */
+	public Object playMatches(ArrayList<Object> matchesToPlay){
+
+		System.out.println("matchesToPlay: " +matchesToPlay);
+		int i = matches.indexOf(matchesToPlay);
+		//System.out.println("matches.indexOf(matchesToPlay): "+matches.indexOf(matchesToPlay));
+		System.out.println("matches: " +matches);
 		
+		tournamentBracket.update(matches);
 		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+//		//if only one element in array, return it
+		if(matchesToPlay.size()==1){
+			System.out.println("It's a loner");
+			return matchesToPlay;
+		} else {
+			//break up the pair into parts
+			ArrayList<Object> part1 = (ArrayList<Object>)matchesToPlay.get(0);
+			ArrayList<Object> part2 = (ArrayList<Object>)matchesToPlay.get(1);
+			
+			//if it is the basic pair (i.e. [[player1], [player2]]),
+			//play the match between them
+			if( part1.get(0).getClass() == "".getClass() &&
+					 part2.get(0).getClass() == "".getClass()){
+				System.out.println("It's a final pair ready for combat");
+				ArrayList<Object> resultArray = new ArrayList<>();
+				resultArray.add(pretendMatch((String)part1.get(0), 
+						(String)part2.get(0)));
+				//replace the original pair with the winner
+				if(i != -1){
+					matches.set(i, resultArray);
+				} else if (matches == matchesToPlay){
+				 	matches = resultArray;
+				}
+				return playMatches(resultArray);
+			}else {
+				//explore one of the branches
+				System.out.println("Need to go deeper");
+				ArrayList<Object> resultArray = new ArrayList<>();
+				
+				//deal with only one branch at a time (hacky?..)
+				if(part1.size()>1){
+					resultArray.add(playMatches(part1));
+					resultArray.add(part2);	
+				} else {
+					resultArray.add(part1);
+					resultArray.add(playMatches(part2));
+				}				
+
+				//replace the original array with the reduced one
+				if(i != -1){
+					matches.set(i, resultArray);
+				} else if (matches == matchesToPlay){
+					matches = resultArray;
+				}
+				return playMatches(resultArray);
+			}
+			
+		}
+			
+			
 	}
 	
 	public void displayBracket(){
-		JFrame bracket = new JFrame("Tournament Bracket");
-		bracket.add(new TournamentBracket(matches, playerBrains.size()));
+		bracket = new JFrame("Tournament Bracket");
+		tournamentBracket = new TournamentBracket(matches, playerBrains.size());
+		bracket.add(tournamentBracket);
 		bracket.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//for now only
 		bracket.pack();
 		bracket.setLocationRelativeTo(null);
@@ -153,7 +244,7 @@ public class GameManager {
 	
 	public void playDummyTourn(){	
 		setWorld(World.parseWorld("sample0.world"));
-		int numberPlayers = 7;
+		int numberPlayers = 8;
 		for (int i = 1; i <= numberPlayers; i++){
 			addBrain("ex"+i, StateMachine.newInstance("exampleBrain.txt"));
 		}
