@@ -39,15 +39,27 @@ public class ScoreRatioPanel extends JPanel {
 		g2d.setColor(Color.LIGHT_GRAY);
 		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
+		
 		//	Work out the ratio
 		int foodCollected = world.getBlackScore() + world.getRedScore();
 		if (foodCollected == 0)
 			return;
-		int ratio = (int)(((float)world.getRedScore() / (float)foodCollected) * 80);
+		float ratio = (float)world.getRedScore() / (float)foodCollected;
 		g2d.setColor(Color.RED);
-		g2d.fillRect(0, 0, ratio * 8, this.getHeight());
+		g2d.fillRect(0, 0, (int)(ratio*this.getWidth()), this.getHeight());
 		g2d.setColor(Color.BLACK);
-		g2d.fillRect(ratio * 8 + 1, 0, this.getWidth(), this.getHeight());
+		g2d.fillRect((int)(ratio*this.getWidth()), 0, 
+				(int)(this.getWidth()-this.getWidth()*ratio), this.getHeight());
+		
+//		//	Work out the ratio
+//		int foodCollected = world.getBlackScore() + world.getRedScore();
+//		if (foodCollected == 0)
+//			return;
+//		int ratio = (int)(((float)world.getRedScore() / (float)foodCollected) * 80);
+//		g2d.setColor(Color.RED);
+//		g2d.fillRect(0, 0, ratio * 8, this.getHeight());
+//		g2d.setColor(Color.BLACK);
+//		g2d.fillRect(ratio * 8 + 1, 0, this.getWidth(), this.getHeight());
 		
 	}
 }

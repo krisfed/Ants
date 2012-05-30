@@ -103,6 +103,15 @@ public class Cell {
 		return true;
 	}
 	
+	
+	/**
+	 * Resets all markers present in this cell
+	 */
+	public void resetAllMarkers(){
+		redMarkers = new boolean[6];
+		blackMarkers = new boolean[6];	
+	}
+	
 	/**
 	 * Gets the terrain at this location.
 	 * @return the terrain

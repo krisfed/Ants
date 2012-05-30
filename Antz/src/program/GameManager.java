@@ -252,6 +252,60 @@ public class GameManager {
 	}
 	
 	
+	
+	public Object tournMatch(String redName, String blackName){
+		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){
+			
+			while(getScore(redName) == getScore(blackName)){
+				
+				//reset (?)
+				//playerScores.put(redName, 0);
+				
+				world.setRedBrain(redName, this.getBrain(redName));
+				world.setBlackBrain(blackName, this.getBrain(blackName));
+				world.beginGame();
+				
+				showResults();
+	
+				world.swapBrains();
+				world.beginGame();
+				showResults();
+				world.closeScreen();
+			}
+			
+			//announce the winner
+			if(getScore(redName)>getScore(blackName)){
+				showMatchWinner(redName);
+				
+				//reset scores
+				playerScores.put(redName, 0);
+				playerScores.put(blackName, 0);		
+				
+				return redName;
+			} else {
+				showMatchWinner(blackName);
+				
+				//reset scores
+				playerScores.put(redName, 0);
+				playerScores.put(blackName, 0);		
+				
+				return blackName;
+			}
+			
+			
+			
+		}
+		
+		return null;
+	}
+	
+	private void showMatchWinner(String teamName) {
+		JOptionPane.showMessageDialog(null, 
+				"Match winner is " + teamName,
+				"And the winner is..", 
+				JOptionPane.PLAIN_MESSAGE);
+	}
+
 	/**
 	 * Plays a single match
 	 * @param red string-key of the red team brain
@@ -284,9 +338,11 @@ public class GameManager {
 	private void showResults(){
 		String winnerMessage;
 		if (world.getBlackScore() > world.getRedScore()){
+			addScore(world.getBlackName(), 1);
 			winnerMessage = world.getBlackName() + " won!\n";
 		} else if (world.getBlackScore() < world.getRedScore()){
 			winnerMessage = world.getRedName() + " won!\n";
+			addScore(world.getRedName(), 1);
 		} else {
 			winnerMessage = "It's a draw!\n";
 		}
@@ -349,6 +405,14 @@ public class GameManager {
 		if (playerScores.containsKey(name))
 			return playerScores.get(name);
 		return -1;
+	}
+	
+	public void addScore(String name, int score) {
+		if (playerScores.containsKey(name)){
+			int oldScore = playerScores.get(name);
+			playerScores.put(name, oldScore + 1);
+		}
+			
 	}
 	
 	/**

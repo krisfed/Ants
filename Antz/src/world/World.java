@@ -69,6 +69,17 @@ public class World {
 		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		ants = new ArrayList<>();
 		
+		//reset scores for a new game:
+		redScore = 0;
+		blackScore = 0;
+		
+		//reset markers for a new game:
+		for (int i = 0; i < cells.length; i ++) {
+			for (int j = 0 ; j < cells[0].length; j ++) {
+				cells[i][j].resetAllMarkers();
+			}
+		}
+		
 		if(redBrain != null && redName != null && blackBrain != null && blackName != null){
 			//create GUI from EDT:
 			Runnable createGameplayScreen= new Runnable() {
@@ -958,6 +969,7 @@ public class World {
 		blackBrain = swap;
 		redName = blackName;
 		blackName = swapString;
+
 	}
 
 	/**
