@@ -148,6 +148,7 @@ public class TournamentScreen extends JFrame{
 	 * Closes the tournament screen
 	 */
 	private void closeScreen() {
+		gm.setWorld(null);//in case the world was set
 		gm.resetBrains(); //in case any brains were set
 		dispose();
 		

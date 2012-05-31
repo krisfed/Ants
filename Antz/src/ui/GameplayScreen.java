@@ -41,8 +41,8 @@ public class GameplayScreen extends JFrame {
 	public GameplayScreen(final World world)
 	{
 		super("Antz");
-		System.out.println("GameplayScreen Constructor");
-		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+//		System.out.println("GameplayScreen Constructor");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		this.world = world;
 	    Container pane = this.getContentPane();
 	    JPanel outerPanel = new JPanel(new BorderLayout());

@@ -65,8 +65,8 @@ public class MapPanel extends JLabel{
 		this.setPreferredSize(new Dimension(world.getWidth() * 18 , world.getHeight() *21));
 		//this.setPreferredSize(new Dimension(world.getWidth() * imageWidth , world.getHeight() * (imageHeight-20)));
 
-		System.out.println("Map Panel constructor");
-		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+//		System.out.println("Map Panel constructor");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		
 		drawMarkers = false;
 		/**

@@ -34,7 +34,7 @@ public class GameManager {
 
 	private World world;
 	
-	private int roundN; //number of the current match in a tournament
+	private int roundN; //consecutive number of the current match in a tournament
 	
 	
 	/**
@@ -162,12 +162,12 @@ public class GameManager {
 	 * @return returns the winner of given matches
 	 */
 	public Object playMatches(ArrayList<Object> matchesToPlay){
-		System.out.println("playMatches()");
-		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+//		System.out.println("playMatches()");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 
-		System.out.println("matchesToPlay: " +matchesToPlay);
+//		System.out.println("matchesToPlay: " +matchesToPlay);
 		int i = matches.indexOf(matchesToPlay);
-		System.out.println("matches: " +matches);
+//		System.out.println("matches: " +matches);
 
 
 		//if only one element in array, return it
