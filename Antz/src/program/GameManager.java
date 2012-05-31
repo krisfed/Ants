@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import ui.BracketScreen;
 import ui.GameplayScreen;
 import ui.MatchScreen;
 import ui.StartUpScreen;
@@ -33,8 +34,7 @@ public class GameManager {
 
 	private World world;
 	
-	private JFrame bracket;
-	private TournamentBracket tournamentBracket;
+	private int roundN; //number of the current match in a tournament
 	
 	
 	/**
@@ -43,15 +43,16 @@ public class GameManager {
 	public GameManager() {
 		playerBrains = new HashMap<>();
 		playerScores = new HashMap<>();
+		roundN = 0;
 		setWorld(null);
 		if (debug)
 		{
 			
-			//StartUpScreen startUp = new StartUpScreen(this);
+			StartUpScreen startUp = new StartUpScreen(this);
 			//MatchScreen matchScreen = new MatchScreen(this);
 			//playDummyMatch();
 			//TournamentScreen tournScreen = new TournamentScreen(this);
-			playDummyTourn();
+			//playDummyTourn();
 			
 		} else {
 			TournamentScreen ui = new TournamentScreen(this);
@@ -65,6 +66,9 @@ public class GameManager {
 	 * @return multi-nested array list of pairs
 	 */
 	private ArrayList<Object> combineIntoPairs(ArrayList<Object> pairs){
+//		System.out.println("combineIntoPairs()");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+		
 		//if already only one pair, return as is
 		if (pairs.size() == 2){
 			//in case it's first recursion, and input is
@@ -124,26 +128,23 @@ public class GameManager {
 	/**
 	 * Works out the correct matching of brains for a tournament to be held.
 	 */
-	public void assignMatches()
-	{
+	public void assignMatches(){
+//		System.out.println("assignMatches()");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+		
 		ArrayList<Object> players = new ArrayList<>();//players to assign
 		players.addAll(playerBrains.keySet()); //add all team names
 		
 		matches = combineIntoPairs(players);
 		System.out.println(matches);
-//		for (Object pair : matches){
-//			System.out.println(pair);
-//		}
-
-		displayBracket();
-		System.out.println("==Result: " +playMatches(matches));
+		
 	}
 	
 	/**
 	 * Simulation of the match: select the winner at random
-	 * @param str1
-	 * @param str2
-	 * @return
+	 * @param str1 name of first player
+	 * @param str2 name of second player
+	 * @return the "winner"
 	 */
 	private Object pretendMatch(String str1, String str2){
 		if(Math.random()>0.5){
@@ -157,25 +158,20 @@ public class GameManager {
 	
 	/**
 	 * Recursively plays out all the matches
-	 * @param matchesToPlay
+	 * @param matchesToPlay matches to complete
+	 * @return returns the winner of given matches
 	 */
 	public Object playMatches(ArrayList<Object> matchesToPlay){
+		System.out.println("playMatches()");
+		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 
 		System.out.println("matchesToPlay: " +matchesToPlay);
 		int i = matches.indexOf(matchesToPlay);
-		//System.out.println("matches.indexOf(matchesToPlay): "+matches.indexOf(matchesToPlay));
 		System.out.println("matches: " +matches);
-		
-		tournamentBracket.update(matches);
-		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-//		//if only one element in array, return it
+
+
+		//if only one element in array, return it
 		if(matchesToPlay.size()==1){
-			System.out.println("It's a loner");
 			return matchesToPlay;
 		} else {
 			//break up the pair into parts
@@ -186,9 +182,10 @@ public class GameManager {
 			//play the match between them
 			if( part1.get(0).getClass() == "".getClass() &&
 					 part2.get(0).getClass() == "".getClass()){
-				System.out.println("It's a final pair ready for combat");
 				ArrayList<Object> resultArray = new ArrayList<>();
-				resultArray.add(pretendMatch((String)part1.get(0), 
+//				resultArray.add(pretendMatch((String)part1.get(0), 
+//						(String)part2.get(0)));
+				resultArray.add(tournMatch((String)part1.get(0), 
 						(String)part2.get(0)));
 				//replace the original pair with the winner
 				if(i != -1){
@@ -199,7 +196,6 @@ public class GameManager {
 				return playMatches(resultArray);
 			}else {
 				//explore one of the branches
-				System.out.println("Need to go deeper");
 				ArrayList<Object> resultArray = new ArrayList<>();
 				
 				//deal with only one branch at a time (hacky?..)
@@ -225,47 +221,131 @@ public class GameManager {
 			
 	}
 	
-	public void displayBracket(){
-		bracket = new JFrame("Tournament Bracket");
-		tournamentBracket = new TournamentBracket(matches, playerBrains.size());
-		bracket.add(tournamentBracket);
-		bracket.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//for now only
-		bracket.pack();
-		bracket.setLocationRelativeTo(null);
-		bracket.setVisible(true);
-	}
 	
+//	/**
+//	 * Displays the current state of the tournament
+//	 * (tournament bracket)
+//	 * @param player1 One player of the next match
+//	 * @param player2 Second player of the next match
+//	 */
+//	public void displayBracket(final String player1, final String player2){
+//		Runnable showBracket = new Runnable() {
+//			public void run() {
+//				BracketScreen bracketScreen = new BracketScreen(matches, playerBrains.size(), 
+//						roundN, player1, player2);
+//			}
+//		};
+//		try {
+//			SwingUtilities.invokeAndWait(showBracket);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//	}
+	
+	
+	/**
+	 * Sets the world and brains to play an example singular match
+	 * (for debugging/testing)
+	 */
 	public void playDummyMatch(){	
 		setWorld(World.parseWorld("sample0.world"));
 		addBrain("crapBrain.txt", StateMachine.newInstance("crapBrain.txt"));
 		addBrain("exampleBrain.txt", StateMachine.newInstance("exampleBrain.txt"));
-		playMatch("crapBrain.txt", "exampleBrain.txt");
+		playSingularMatch("crapBrain.txt", "exampleBrain.txt");
 	}
 	
+	
+	/**
+	 * Sets the world and brains to play an example tournament
+	 * (for debugging/testing)
+	 */
 	public void playDummyTourn(){	
-		setWorld(World.parseWorld("sample0.world"));
-		int numberPlayers = 8;
+		setWorld(World.parseWorld("tinyworld.txt"));
+		int numberPlayers = 3;
 		for (int i = 1; i <= numberPlayers; i++){
 			addBrain("ex"+i, StateMachine.newInstance("exampleBrain.txt"));
 		}
 		assignMatches();
+		
+		Object winner = playMatches(matches);
+		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+		JOptionPane.showMessageDialog(null, 
+				winner + " won the tournament!",
+				"And the winner is..", 
+				JOptionPane.PLAIN_MESSAGE);
+		
+		//reset round #
+		roundN = 0;
+		//reset all brains and scores
+		resetBrains();
+		//reset the world
+		world = null;
+	}
+	
+	
+	/**
+	 * Organises and plays a whole tournament
+	 */
+	public void playTournament(){
+		//if there is a world and at least two brains
+		if((world != null) && (playerBrains.size() > 1)){
+			//pair up the players:
+			assignMatches();
+			//play all matches:
+			final String winner = ((ArrayList<String>) playMatches(matches)).get(0);
+			//announce the winner:
+			Runnable showMessage = new Runnable() {
+				public void run() {
+					System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+					JOptionPane.showMessageDialog(null, 
+							winner + " won the tournament!",
+							"And the winner is..", 
+							JOptionPane.PLAIN_MESSAGE);
+				}
+			};
+			SwingUtilities.invokeLater(showMessage);
+
+			
+
+			
+			//reset round #
+			roundN = 0;
+			//reset all brains and scores
+			resetBrains();
+			//reset the world
+			world = null;
+			
+		}
 	}
 	
 	
 	
+	/**
+	 * Plays a match as part of a tournament
+	 * @param redName one player
+	 * @param blackName second player
+	 * @return winner
+	 */
 	public Object tournMatch(String redName, String blackName){
+		System.out.println("tournMatch()");
+		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){
 			
+			roundN++;
+			
+			// show the tournament bracket:
+			BracketScreen bracketScreen = new BracketScreen(matches, playerBrains.size(), 
+							roundN, redName, blackName);
+
+			//while there is no winner, keep playing a pair of games
 			while(getScore(redName) == getScore(blackName)){
-				
-				//reset (?)
-				//playerScores.put(redName, 0);
 				
 				world.setRedBrain(redName, this.getBrain(redName));
 				world.setBlackBrain(blackName, this.getBrain(blackName));
 				world.beginGame();
-				
 				showResults();
+				world.closeScreen();
 	
 				world.swapBrains();
 				world.beginGame();
@@ -292,54 +372,70 @@ public class GameManager {
 				return blackName;
 			}
 			
-			
-			
 		}
 		
 		return null;
 	}
 	
+	
+	/**
+	 * Shows results of a match.
+	 * @param teamName name of a match winner
+	 */
 	private void showMatchWinner(String teamName) {
 		JOptionPane.showMessageDialog(null, 
-				"Match winner is " + teamName,
-				"And the winner is..", 
+				"Match winner is " + teamName + "!",
+				"Match Results", 
 				JOptionPane.PLAIN_MESSAGE);
 	}
 
 	/**
-	 * Plays a single match
+	 * Plays a singular match (not as part of a tournament)
 	 * @param red string-key of the red team brain
 	 * @param black string-key of the black team brain
 	 */
-	public void playMatch(String redName, String blackName){
+	public void playSingularMatch(String redName, String blackName){
 		System.out.println(playerBrains);
-		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){
-			world.setRedBrain(redName, this.getBrain(redName));
-			world.setBlackBrain(blackName, this.getBrain(blackName));
+		if((playerBrains.containsKey(redName))&&(playerBrains.containsKey(blackName))){			
 			
-			System.out.println("game set up");
+			while(getScore(redName) == getScore(blackName)){
+				
+				world.setRedBrain(redName, this.getBrain(redName));
+				world.setBlackBrain(blackName, this.getBrain(blackName));
+				world.beginGame();
+				showResults();
+				world.closeScreen();
+	
+				world.swapBrains();
+				world.beginGame();
+				showResults();
+				world.closeScreen();
+			}
 			
-			world.beginGame();
-			showResults();
-			world.closeScreen();
+			//announce the winner
+			if(getScore(redName)>getScore(blackName)){
+				showMatchWinner(redName);
+			} else {
+				showMatchWinner(blackName);
+			}
+
 		
-			world.swapBrains();
-			world.beginGame();
-			showResults();
-			world.closeScreen();
-		
-		// if this is a singular match:
+		// singular match - need to reset brains and scores
 		this.resetBrains();
 			
 		}
 		
 	}
 	
+	/**
+	 * Shows results of a single game and updates
+	 * the scores
+	 */
 	private void showResults(){
 		String winnerMessage;
 		if (world.getBlackScore() > world.getRedScore()){
 			addScore(world.getBlackName(), 1);
-			winnerMessage = world.getBlackName() + " won!\n";
+			winnerMessage = world.getBlackName() + " won this game!\n";
 		} else if (world.getBlackScore() < world.getRedScore()){
 			winnerMessage = world.getRedName() + " won!\n";
 			addScore(world.getRedName(), 1);
@@ -348,9 +444,8 @@ public class GameManager {
 		}
 		JOptionPane.showMessageDialog(null, 
 			winnerMessage,
-			"Pleased to announce the winner!", 
+			"Game Results", 
 			JOptionPane.PLAIN_MESSAGE);
-		
 	}
 	
 	/**

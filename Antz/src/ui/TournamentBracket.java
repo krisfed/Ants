@@ -19,12 +19,11 @@ import javax.swing.JLabel;
 /**
  * Displays the current state of the tournament
  * @author kris
- *
  */
 public class TournamentBracket extends JLabel{
 	
 	//dimensions of the basic bracket
-	private final int BRACKET_W = 100;
+	private final int BRACKET_W = 200;
 	private final int BRACKET_H = 80;
 	
 	private final int TEXT_SIZE = 15;
@@ -42,7 +41,7 @@ public class TournamentBracket extends JLabel{
 	public TournamentBracket(ArrayList<Object> matches, int nPlayers){
 		this.matches = matches;
 		this.nPlayers = nPlayers;
-		this.nRows = calculateRounds();
+		this.nRows = calculateRows();
 		setPreferredSize(new Dimension(
 				(int)(2*Math.pow(2,nRows-1)*BRACKET_W),
 				(nRows+1)*BRACKET_H+TEXT_SIZE+5));
@@ -53,12 +52,12 @@ public class TournamentBracket extends JLabel{
 	 * Determine the number of horizontal rows in a bracket
 	 * @return number of rows
 	 */
-	private int calculateRounds(){
-		int nRounds = 0;
-		while(Math.pow(2,nRounds) < nPlayers){
-			nRounds++;
+	private int calculateRows(){
+		int rows = 0;
+		while(Math.pow(2,rows) < nPlayers){
+			rows++;
 		}
-		return nRounds;
+		return rows;
 	}
 	
 	/**

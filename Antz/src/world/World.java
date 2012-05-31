@@ -33,12 +33,13 @@ import ui.GameplayScreen;
 public class World {
 	
 	private Cell[][] cells;							//	The grid of cells which comprise this world
+	private Cell[][] unchangedCells;
 	private ArrayList<Ant> ants;					//	The ants in the world
 	private StateMachine redBrain, blackBrain;		//	The two opposing player brains
 	private String redName, blackName;				//  Team names
 	private int redScore, blackScore;				//	Running total of scores
 	private GameplayScreen screen;
-	private static final int MAXTURNS = 10000; //10000;//300000;
+	private static final int MAXTURNS = 10000; //300000;
 	private int sleepAmount = 0;
 	private boolean isPaused;
 	private int turn;
@@ -56,8 +57,8 @@ public class World {
 				cells[i][j].setWorld(this);
 			}
 		}
+		this.unchangedCells = deepCopyCells(this.cells);	
 		logger = new AntLogger(this);
-		
 	}
 	
 		
@@ -65,20 +66,16 @@ public class World {
 	 * Starts a new game
 	 */
 	public void beginGame() {
-		System.out.println("beginGame()");
-		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+//		System.out.println("beginGame()");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		ants = new ArrayList<>();
 		
 		//reset scores for a new game:
 		redScore = 0;
 		blackScore = 0;
-		
-		//reset markers for a new game:
-		for (int i = 0; i < cells.length; i ++) {
-			for (int j = 0 ; j < cells[0].length; j ++) {
-				cells[i][j].resetAllMarkers();
-			}
-		}
+				
+		//reset the map (markers, food, ants):
+		cells = deepCopyCells(unchangedCells);
 		
 		if(redBrain != null && redName != null && blackBrain != null && blackName != null){
 			//create GUI from EDT:
@@ -93,6 +90,7 @@ public class World {
 				e.printStackTrace();
 			}	
 	
+		
 			//set up
 			setStartingAnts();
 
@@ -102,6 +100,10 @@ public class World {
 				
 			//run game loop
 			update(); 
+			
+
+			
+
 		}
 		
 	}
@@ -110,8 +112,8 @@ public class World {
 	 * Sets up the initial ants in the world.
 	 */
 	private void setStartingAnts() {
-		System.out.println("setStartingAnts()");
-		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+//		System.out.println("setStartingAnts()");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 		//NOTE:
 		//cells[0].length = y
 		//cells.length = x
@@ -127,15 +129,15 @@ public class World {
 					ants.add(ant);
 				}
 			}
-		}		
+		}
 	}
 
 	/**
 	 * Runs a loop of the game.
 	 */
 	private void update() {
-		System.out.println("update()");
-		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
+//		System.out.println("update()");
+//		System.out.println("isEventDispatchThread()" + SwingUtilities.isEventDispatchThread());
 
 		for (turn = 1; turn <= MAXTURNS; turn++) {
 												
@@ -143,10 +145,10 @@ public class World {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			
 			for (Ant ant : ants) {
 				if (ant.isAlive()) {
 					if (ant.getResting() > 0) {
@@ -165,7 +167,7 @@ public class World {
 				public void run() { screen.update(); }
 			};
 			SwingUtilities.invokeLater(updateDisplay);
-												
+			//screen.update();					
 						
 			//	dump turn info
 //			if (logger != null) {
@@ -189,7 +191,7 @@ public class World {
 	
 	
 	/**
-	 * Close the gameplay scren
+	 * Close the gameplay screen
 	 */
 	public void closeScreen(){
 		screen.dispose();
@@ -878,6 +880,21 @@ public class World {
 	}
 	
 	/**
+	 * Copies a 2d array of cells 
+	 * @param original original array
+	 * @return copy of the original array
+	 */
+	private static Cell[][] deepCopyCells(Cell[][] original){
+		Cell[][] copy = new Cell[original.length][original[0].length];
+		for (int i = 0; i < original.length; i ++) {
+			for (int j = 0; j < original[0].length; j ++) {
+				copy[i][j] = Cell.copy(original[i][j]);
+			}
+		}
+		return copy;
+	}
+	
+	/**
 	 * Parses a world file to World object.
 	 * @param absolutePath the path to the World file
 	 * @return the World object or null if a problem was encountered
@@ -933,6 +950,7 @@ public class World {
 					} 
 				}
 			}//end of rocky borders check
+			
 			
 			return new World(cells);
 			

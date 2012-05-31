@@ -265,19 +265,15 @@ public class MatchScreen extends JFrame {
 		}
 				
 		
+		// play match in worker thread
 		SwingWorker<Void, Void> worker =
 		new SwingWorker<Void, Void>() {
-	
-	   public Void doInBackground() {
-		gm.playMatch(redTeamName, blackTeamName);
-		return null;
-	   }
+			public Void doInBackground() {
+				gm.playSingularMatch(redTeamName, blackTeamName);
+				return null;
+			}
 		};
 		worker.execute();
-		
-//		JOptionPane.showMessageDialog(null, "Error!\nThis Map text file is invalid.\n"+
-//				"Please check the contents of this file or try uploading a different one.", 
-//				"What's that?", JOptionPane.PLAIN_MESSAGE);
 		
 		//close window
 		this.setVisible(false);

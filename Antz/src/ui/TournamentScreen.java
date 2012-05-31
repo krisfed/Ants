@@ -1,12 +1,10 @@
 package ui;
 
-import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -14,25 +12,21 @@ import java.awt.event.FocusEvent;
 import java.io.File;
 
 import javax.swing.AbstractAction;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
-import enums.E_Color;
+
 
 import program.GameManager;
-import ui.MatchScreen.WorldFocusListener;
 import world.World;
 import ai.StateMachine;
 
@@ -257,6 +251,10 @@ public class TournamentScreen extends JFrame{
 		checkCanStartTournament();
 	}
 	
+	/**
+	 * Checks if the world is set and if there are
+	 * enough (>= 2) brains to start a tournament.
+	 */
 	private void checkCanStartTournament() {
 		if( (gm.getWorld() != null) && (gm.getTotalPlayers() >=2) ){
 			beginButton.setEnabled(true);
@@ -280,11 +278,28 @@ public class TournamentScreen extends JFrame{
 		}
 	}
 
-	protected void startTournament() {
-		// TODO Auto-generated method stub
+	private void startTournament() {
+		// play tournament in worker thread
+		SwingWorker<Void, Void> worker =
+		new SwingWorker<Void, Void>() {
+			public Void doInBackground() {
+				gm.playTournament();;
+				return null;
+			}
+		};
+		worker.execute();
+		
+		//close window
+		this.setVisible(false);
+		this.dispose();
+		
 		
 	}
 
+	
+	/**
+	 * Arrange the components with grid bag layout
+	 */
 	private void addComponents() {
 		Container pane = this.getContentPane();
 		
